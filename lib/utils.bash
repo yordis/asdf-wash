@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for wash.
-GH_REPO="https://github.com/wasmCloud/wash"
+GH_REPO="https://github.com/wasmCloud/wasmCloud"
 TOOL_NAME="wash"
 TOOL_TEST="wash --version"
 
@@ -37,10 +37,15 @@ list_all_versions() {
 }
 
 download_release() {
-	local version filename url
+	local version filename url os arch
 	version="$1"
 	filename="$2"
 
+	# Optional, if your TOOL requires os and arch
+	# os=$(get_machine_os)
+	# arch=$(get_machine_arch)
+
+	# TODO: If your tool requires OS and ARCH // url="${GH_REPO}/releases/download/v${version}/${TOOL_NAME}_${version}_${os}_${arch}.tar.gz"
 	# TODO: Adapt the release URL convention for wash
 	url="$GH_REPO/archive/v${version}.tar.gz"
 
@@ -71,4 +76,29 @@ install_version() {
 		rm -rf "$install_path"
 		fail "An error occurred while installing $TOOL_NAME $version."
 	)
+}
+
+get_machine_os() {
+  local OS
+  OS=$(uname -s | tr '[:upper:]' '[:lower:]')
+
+  case "${OS}" in
+    darwin*) echo "darwin" ;;
+     linux*) echo "linux" ;;
+          *) fail "OS not supported: ${OS}" ;;
+  esac
+}
+
+get_machine_arch() {
+  local ARCH
+  ARCH=$(uname -m | tr '[:upper:]' '[:lower:]')
+
+  case "${ARCH}" in
+       i?86) echo "386" ;;
+     x86_64) echo "amd64" ;;
+    aarch64) echo "arm64" ;;
+     armv8l) echo "arm64" ;;
+      arm64) echo "arm64" ;;
+          *) fail "Architecture not supported: $ARCH" ;;
+  esac
 }
